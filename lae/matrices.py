@@ -70,5 +70,5 @@ def fmt_matrix(a: Matrix) -> str:
     """
     cells = [[fmt(x) for x in r] for r in a]
     widths = [max(len(r[j]) for r in cells) for j in range(len(cells[0]))]
-    lines = ("| " + " ".join(c.rjust(w) for c, w in zip(r, widths)) + " |" for r in cells)
+    lines = ("| " + "  ".join(c.rjust(w) for c, w in zip(r, widths)) + " |" for r in cells)
     return "\n".join(lines)

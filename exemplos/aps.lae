@@ -1,0 +1,40 @@
+# APS de Álgebra Linear Aplicada, escrita na mini-linguagem do motor.
+# Rode com:  python -m lae.cli explicar exemplos/aps.lae
+
+## Exercício 1: 2u + 3v - 5w
+u = (3, 0, 1)
+v = (-5, 1, 2)
+w = (0, 1, 4)
+2u + 3v - 5w
+
+## Exercício 2: x + y, onde (-6, 7) = x(3, 4) + y(2, 3)
+resolver x, y: (-6, 7) = x*(3, 4) + y*(2, 3)
+x + y
+
+## Exercício 3: distância e cosseno do ângulo entre u e v
+u = (6, 3, 6)
+v = (6, 0, -8)
+dist(u, v)
+cos(u, v)
+
+## Exercício 4: a e b tais que w = au + bv
+u = (-2, 1)
+v = (5, 2)
+w = (-3, -2)
+resolver a, b: w = a*u + b*v
+
+## Exercício 5: H2 = {(x, 12x, y) | x, y reais} é subespaço?
+subespaco {(x, 12x, y) | x, y}
+
+## Exercício 6: T(x, y, z) = (x + z, y + z), calcule T(1, 2, 10)
+T(x, y, z) = (x + z, y + z)
+T(1, 2, 10)
+
+## Exercício 7: C = 2A + A*B
+A = [[3, 7], [8, 4]]
+B = [[2, 10], [0, 41]]
+2A + A*B
+
+## Exercício 8: det(A transposta)
+A = [[-2, 4, 2], [-2, 3, 1], [-1, 2, 0]]
+det(transposta(A))

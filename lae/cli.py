@@ -2,6 +2,7 @@
 
 Uso:
     python -m lae.cli explicar exemplos/aps.lae    (passo a passo com verificação)
+    python -m lae.cli passos exemplos/aps.lae      (só o passo a passo e o resultado)
     python -m lae.cli resolver exemplos/aps.lae    (só os resultados)
     python -m lae.cli resolver                     (lê do teclado; termine com Ctrl+D)
 """
@@ -19,8 +20,9 @@ from lae.validator import check
 def main(argv: list[str] | None = None) -> int:
     """Executa o motor. Retorna 0 (tudo certo), 1 (erro ou verificação falhou) ou 2 (entrada inválida)."""
     ap = argparse.ArgumentParser(prog="lae", description="Motor de álgebra linear com aritmética exata.")
-    ap.add_argument("modo", choices=["resolver", "explicar"],
-                    help="resolver: só os resultados; explicar: passo a passo com verificação")
+    ap.add_argument("modo", choices=["resolver", "passos", "explicar"],
+                    help="resolver: só os resultados; passos: passo a passo simples; "
+                         "explicar: passo a passo com verificação")
     ap.add_argument("arquivo", nargs="?", default="-",
                     help="arquivo .lae; sem arquivo (ou '-') lê do teclado")
     args = ap.parse_args(argv)
@@ -42,7 +44,8 @@ def main(argv: list[str] | None = None) -> int:
 
     report = run(program)
     explain = args.modo == "explicar"
-    print(render(report, explain=explain, checks=check if explain else None), end="")
+    plain = args.modo == "passos"
+    print(render(report, explain=explain or plain, checks=check if explain else None, plain=plain), end="")
 
     commands = [o for o in report.outcomes if not isinstance(o.line.command, Title)]
     errors = sum(1 for o in commands if o.error)

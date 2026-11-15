@@ -335,10 +335,13 @@ def _explain_implicit(cmd: ImplicitSubspace, r: SubspaceResult, scope: Engine) -
                     "Base: uma solução para cada variável livre do escalonamento."]
 
 
-def _explain(o: Outcome) -> list[str]:
+def _explain(o: Outcome, plain: bool = False) -> list[str]:
     cmd, value, scope = o.line.command, o.value, o.scope
+    head = o.line.source if plain else f">> {o.line.source}"
     match cmd:
         case Assign(name, Num() | Vec() | Mat()):
+            if plain:
+                return []
             first, *rest = _eq(name, value)
             return [f"Dado: {first}"] + [f"      {line}" for line in rest]
         case Assign(name, expr):
@@ -348,23 +351,27 @@ def _explain(o: Outcome) -> list[str]:
         case Solve():
             body = _explain_solve(cmd, value)
             result = [f"Resultado: {solution_text(value, list(cmd.unknowns))}"]
-            return [f">> {o.line.source}"] + ["  " + ln for ln in body + result]
+            return [head] + ["  " + ln for ln in body + result]
         case Define(name, params):
             formula = ", ".join(linear_text(list(row), list(params)) for row in value.matrix)
             body = [f"{name}: R^{value.domain} -> R^{value.codomain}, {name}({', '.join(params)}) = ({formula})",
                     "Matriz canônica (linha i = coeficientes da coordenada i):"]
             body += ["  " + ln for ln in fmt_matrix(value.matrix).splitlines()]
-            return [f">> {o.line.source}"] + ["  " + ln for ln in body]
+            return [head] + ["  " + ln for ln in body]
         case ParamSubspace() | ImplicitSubspace():
             n = len(cmd.coords) if isinstance(cmd, ParamSubspace) else len(cmd.names)
             body = (_explain_param(cmd, value, scope) if isinstance(cmd, ParamSubspace)
                     else _explain_implicit(cmd, value, scope))
             result = [f"Resultado: {subspace_text(value, n)}"]
-            return [f">> {o.line.source}"] + ["  " + ln for ln in body + result]
+            return [head] + ["  " + ln for ln in body + result]
         case _:
             return []
-    result = ["Resultado: " + ln if i == 0 else "  " + ln for i, ln in enumerate(_eq(label, value))]
-    return [f">> {o.line.source}"] + ["  " + ln for ln in body + result]
+    if plain:  # só o valor: "Resultado: (6, 9, 8)"
+        first, *rest = fmt_value(value).splitlines()
+        result = [f"Resultado: {first}"] if not rest else ["Resultado:", "  " + first] + ["  " + ln for ln in rest]
+    else:
+        result = ["Resultado: " + ln if i == 0 else "  " + ln for i, ln in enumerate(_eq(label, value))]
+    return [head] + ["  " + ln for ln in body + result]
 
 
 def _short(o: Outcome) -> list[str]:
@@ -383,10 +390,12 @@ def _short(o: Outcome) -> list[str]:
     return [o.line.source]
 
 
-def render(report: Report, explain: bool = True, checks: Checker | None = None) -> str:
-    """Monta o texto final. `checks` (do validator) acrescenta a verificação no modo explicar."""
+def render(report: Report, explain: bool = True, checks: Checker | None = None,
+           plain: bool = False) -> str:
+    """Monta o texto final. `checks` (do validator) acrescenta a verificação no modo explicar.
+    Com plain=True: só os passos e o resultado, sem dados, avisos nem verificação."""
     out: list[str] = []
-    if report.warnings:
+    if report.warnings and not plain:
         out += ["AVISOS (trechos ignorados no cálculo):"] + [f"  {w}" for w in report.warnings] + [""]
     for o in report.outcomes:
         if isinstance(o.line.command, Title):
@@ -396,9 +405,9 @@ def render(report: Report, explain: bool = True, checks: Checker | None = None) 
         elif not explain:
             out += _short(o)
         else:
-            lines = _explain(o)
-            verified = checks(o) if checks else []
+            lines = _explain(o, plain)
+            verified = checks(o) if checks and not plain else []
             if verified:
                 lines += ["  Verificação:"] + [f"    {c}" for c in verified]
-            out += lines + ([""] if lines and lines[0].startswith(">>") else [])
+            out += lines + ([""] if lines and not lines[0].startswith("Dado:") else [])
     return "\n".join(out).strip("\n") + "\n"

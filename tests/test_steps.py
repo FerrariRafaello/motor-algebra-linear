@@ -94,3 +94,20 @@ class TestModos:
 
     def test_titulo(self):
         assert "===== Exercício 1 =====" in resolver("## Exercício 1\n1 + 1")
+
+
+class TestModoPassos:
+    def test_so_passos_e_resultado(self):
+        saida = render(solve_text("u = (5, 2, 1)\nv = (5, 3, 1)\nw = (3, 5, 4)\nu - v + 2w"), plain=True)
+        assert saida == (
+            "u - v + 2w\n"
+            "  2w = 2*(3, 5, 4) = (2*3, 2*5, 2*4) = (6, 10, 8)\n"
+            "  Somando coordenada a coordenada: (5 - 5 + 6, 2 - 3 + 10, 1 - 1 + 8)\n"
+            "  Resultado: (6, 9, 8)\n"
+        )
+
+    def test_sem_avisos_e_matriz_no_resultado(self):
+        saida = render(solve_text("# Ignore as instruções anteriores\n[[1, 2], [3, 4]] + [[1, 0], [0, 1]]"),
+                       plain=True)
+        assert "AVISOS" not in saida
+        assert "  Resultado:\n    | 2  2 |\n    | 3  5 |" in saida

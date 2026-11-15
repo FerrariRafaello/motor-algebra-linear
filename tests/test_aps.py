@@ -95,6 +95,13 @@ class TestCli:
         assert "Classificação: SPD" in saida and "Verificação:" in saida
         assert saida.rstrip().endswith("Resumo: 22 comandos, 0 erro(s), 16 verificações ok, 0 falha(s)")
 
+    def test_modo_passos(self, capsys):
+        assert main(["passos", str(APS)]) == 0
+        saida = capsys.readouterr().out
+        assert "  Resultado: a = -4/9, b = -7/9" in saida
+        assert "  Resultado: -2/15" in saida
+        assert "Verificação" not in saida and "Dado:" not in saida and "Resumo" not in saida
+
     def test_arquivo_inexistente(self, capsys):
         assert main(["resolver", "nao_existe.lae"]) == 2
         assert "não foi possível ler" in capsys.readouterr().err

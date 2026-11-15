@@ -304,7 +304,7 @@ def _explain_param(cmd: ParamSubspace, r: SubspaceResult, scope: Engine) -> list
     generic = "(" + ", ".join(unparse(c) for c in cmd.coords) + ")"
     combo = " + ".join(f"{p}*{fmt_vector(g)}" for p, g in zip(params, r.generators))
     has_offset = any(offset)
-    lines = [f"Vetor genérico como combinação dos parâmetros:",
+    lines = ["Vetor genérico como combinação dos parâmetros:",
              f"  {generic} = " + (f"{fmt_vector(offset)} + " if has_offset else "") + combo]
     if not r.is_subspace:
         return lines + ["O termo constante impede que algum valor dos parâmetros dê o vetor nulo,",
